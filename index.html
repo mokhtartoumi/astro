@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VLF Meteor Lab — Simulateur</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">LABORATOIRE DE RADIOASTRONOMIE · SIMULATION</div>
+        <h1>VLF <span>METEOR LAB</span></h1>
+        <p>Détection interactive des perturbations du signal VLF</p>
+      </div>
+      <div class="system-status"><span class="status-dot"></span><span id="systemStatus">SYSTÈME PRÊT</span></div>
+    </header>
+
+    <main>
+      <section class="metrics">
+        <article class="metric-card"><span>FRÉQUENCE PORTEUSE</span><strong><span id="freqValue">24.0</span> <small>kHz</small></strong><em>Exemple : émetteur VLF</em></article>
+        <article class="metric-card"><span>ÉTAT DU SIGNAL</span><strong id="signalState">Stable</strong><em id="signalHint">En attente d'une simulation</em></article>
+        <article class="metric-card"><span>ÉVÉNEMENTS DÉTECTÉS</span><strong id="eventCount">0</strong><em>Depuis le démarrage</em></article>
+        <article class="metric-card"><span>AMPLITUDE RELATIVE</span><strong><span id="amplitudeValue">1.00</span> <small>a.u.</small></strong><em>Valeur simulée</em></article>
+      </section>
+
+      <section class="main-grid">
+        <article class="panel scene-panel">
+          <div class="panel-heading">
+            <div><span class="section-tag">01 / PHÉNOMÈNE</span><h2>Propagation des ondes</h2></div>
+            <span class="live-pill"><span class="status-dot"></span><span id="sceneBadge">EN ATTENTE</span></span>
+          </div>
+          <div class="scene" id="scene">
+            <div class="stars" id="stars"></div>
+            <div class="earth-glow"></div>
+            <div class="ionosphere"><span>IONOSPHÈRE · 70–90 KM</span></div>
+            <svg class="wave-layer" viewBox="0 0 800 380" preserveAspectRatio="none" aria-label="Trajet des ondes VLF">
+              <defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#58d9ff"/></marker></defs>
+              <path class="radio-path path-one" d="M80 245 Q300 -15 730 205" />
+              <path class="radio-path path-two" d="M80 245 Q300 30 730 205" />
+              <path class="radio-path path-three" d="M80 245 Q370 80 730 205" />
+            </svg>
+            <div class="transmitter"><div class="tower"><i></i><i></i><i></i></div><div class="pulse-ring"></div><b>ÉMETTEUR VLF</b><small>24 kHz</small></div>
+            <div class="meteor" id="meteor"><div class="meteor-head"></div><div class="meteor-tail"></div></div>
+            <div class="trail-label" id="trailLabel">TRAÎNÉE IONISÉE</div>
+            <div class="receiver"><div class="loop-antenna"></div><div class="antenna-stand"></div><b>RÉCEPTEUR</b><small>Antenne boucle</small></div>
+            <div class="scene-caption" id="sceneCaption">Lancez la simulation pour observer le phénomène.</div>
+          </div>
+          <div class="controls">
+            <button class="primary-btn" id="startBtn"><span>▶</span> Démarrer la simulation</button>
+            <button class="secondary-btn" id="pauseBtn" disabled>Ⅱ Pause</button>
+            <button class="secondary-btn" id="resetBtn">↺ Réinitialiser</button>
+          </div>
+          <div class="step-row">
+            <div class="step active" data-step="0"><span>1</span><small>Émission</small></div>
+            <div class="step" data-step="1"><span>2</span><small>Météore</small></div>
+            <div class="step" data-step="2"><span>3</span><small>Perturbation</small></div>
+            <div class="step" data-step="3"><span>4</span><small>Détection</small></div>
+          </div>
+        </article>
+
+        <article class="panel chart-panel">
+          <div class="panel-heading">
+            <div><span class="section-tag">02 / ACQUISITION</span><h2>Signal VLF reçu</h2></div>
+            <span class="unit-label">AMPLITUDE / TEMPS</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="signalChart" aria-label="Courbe simulée du signal VLF"></canvas>
+            <div class="chart-overlay" id="chartOverlay">En attente de données…</div>
+          </div>
+          <div class="chart-footer"><span>0 ms</span><span id="chartTime">Temps : 0 ms</span><span>300 ms</span></div>
+          <div class="legend"><span><i class="legend-line"></i>Signal reçu (simulé)</span><span><i class="legend-dot"></i>Événement détecté</span></div>
+          <div class="analysis-box">
+            <div><span>Détection</span><strong id="detectionText">Aucune</strong></div>
+            <div><span>Durée estimée</span><strong id="durationText">—</strong></div>
+            <div><span>Pic relatif</span><strong id="peakText">—</strong></div>
+          </div>
+        </article>
+      </section>
+
+
+      <section class="panel tuning-panel">
+        <div class="panel-heading">
+          <div><span class="section-tag">05 / PARAMÈTRES EXPÉRIMENTAUX</span><h2>Contrôler le phénomène</h2></div>
+          <span class="unit-label">SIMULATION INTERACTIVE</span>
+        </div>
+        <div class="tuning-grid">
+          <label class="tune-control">
+            <span>Vitesse du météore <strong id="speedLabel">1.0×</strong></span>
+            <input id="speedControl" type="range" min="0.5" max="2.5" step="0.1" value="1">
+            <small>L'animation et le moment de détection suivent cette vitesse.</small>
+          </label>
+          <label class="tune-control">
+            <span>Intensité de la perturbation <strong id="intensityLabel">70 %</strong></span>
+            <input id="intensityControl" type="range" min="20" max="100" step="5" value="70">
+            <small>Contrôle l'amplitude de la variation sur la courbe.</small>
+          </label>
+          <label class="tune-control">
+            <span>Bruit du signal <strong id="noiseLabel">Faible</strong></span>
+            <input id="noiseControl" type="range" min="0" max="30" step="1" value="5">
+            <small>Ajoute de petites fluctuations au signal de fond.</small>
+          </label>
+          <label class="tune-control">
+            <span>Fréquence porteuse <strong id="frequencyLabel">24 kHz</strong></span>
+            <input id="frequencyControl" type="range" min="15" max="30" step="1" value="24">
+            <small>Choisis une fréquence dans la bande VLF (15–30 kHz).</small>
+          </label>
+        </div>
+        <div class="tuning-actions">
+          <label class="toggle-control"><input type="checkbox" id="autoRepeat"> Répéter automatiquement la simulation</label>
+          <button class="secondary-btn" id="injectBtn">⚡ Déclencher un événement test</button>
+        </div>
+        <p class="tuning-note">Les paramètres modifient un modèle synthétique destiné à l'apprentissage. Pour obtenir un comportement physique mesuré, il faut connecter un vrai récepteur VLF.</p>
+      </section>
+
+      <section class="bottom-grid">
+        <article class="panel explanation-panel">
+          <span class="section-tag">03 / EXPLICATION</span><h2 id="explanationTitle">Comment ça marche ?</h2>
+          <p id="explanationText">Le transmetteur envoie des ondes VLF. Lancez la simulation pour suivre les étapes et voir comment une traînée ionisée peut perturber le signal reçu.</p>
+          <div class="progress-track"><div id="progressBar"></div></div>
+          <div class="note">À noter : les données et la courbe sont générées par le navigateur. Ce prototype ne mesure pas de véritables ondes radio.</div>
+        </article>
+        <article class="panel history-panel">
+          <div class="panel-heading"><div><span class="section-tag">04 / JOURNAL</span><h2>Historique des événements</h2></div><button class="text-btn" id="clearHistoryBtn">Effacer</button></div>
+          <div id="historyList" class="history-list"><div class="empty-history">Aucun événement pour le moment.</div></div>
+        </article>
+      </section>
+      <footer>VLF METEOR LAB <span>·</span> Prototype éducatif interactif <span>·</span> Mesures non réelles</footer>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
